@@ -19,7 +19,7 @@ def open_db_connection():
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             logging.error('DB doesn\'t exist.')
         else:
-            logging.error('Some unexpected error: ' + err)
+            logging.error('Some unexpected error: ' + err.msg)
         connection_info = 'Connection data was: '
         for k, v in configuration.items():
             connection_info += '\n' + ('\t' * 11) + k + ': ' + v

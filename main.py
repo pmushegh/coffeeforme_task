@@ -1,16 +1,21 @@
 from utils import db_utils
 
 import logging
-
-logging_config = {'filename': 'log/all.log',
-                  'filemode': 'a',
-                  'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                  'level': 10}
-
-logging.basicConfig(**logging_config)
+import os
+import json
 
 
 def main():
+    # Create directory for log file if it is not exists
+    directory = os.path.dirname(os.path.realpath(__file__)) + '/log'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Setup logging parameters.
+    logging_config = json.load(open('configurations/log.json'))
+    logging.basicConfig(**logging_config)
+
+    # Setup DB connection.
     connection = db_utils.open_db_connection()
     if connection is None:
         logging.error('No DB connection is established.')

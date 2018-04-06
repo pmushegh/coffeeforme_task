@@ -5,7 +5,7 @@ import logging
 logging_config = {'filename': 'log/all.log',
                   'filemode': 'a',
                   'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                  'level': logging.DEBUG}
+                  'level': 10}
 
 logging.basicConfig(**logging_config)
 

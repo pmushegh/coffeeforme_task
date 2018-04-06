@@ -1,28 +1,44 @@
-import db_utils
+from utils import db_utils
+
 import logging
 
-logger = logging.getLogger('CoffeeForMe_application')
-logger.setLevel(logging.DEBUG)
-logFile = logging.FileHandler('all.log')
-logFile.setLevel(logging.DEBUG)
+logging_config = {'filename': 'log/all.log',
+                  'filemode': 'a',
+                  'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                  'level': logging.DEBUG}
 
-logFormatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logFile.setFormatter(logFormatter)
+logging.basicConfig(**logging_config)
 
-logger.addHandler(logFile)
 
-userName = ''
-role = ''
-
-userName = input('Welcome to CoffeeForMe seller/manager system!'
-                 '\nInput your user name: ')
-logger.info('User name is: ' + userName)
-role = input('Input your role(seller/manager): ')
-if role == 'seller':
-    print('You are in seller mode.')
+def main():
     connection = db_utils.open_db_connection()
+    if connection is None:
+        logging.error('No DB connection is established.')
+        print('Something went wrong during DB connection, please check log.'
+              '\nApplication will exit now.')
+        return
+
+    while True:
+        user_name = input('Welcome to CoffeeForMe seller/manager system!'
+                          '\nInput your user name: ')
+        logging.info('User name is: ' + user_name)
+        role = input('Input your role(seller/manager): ')
+        logging.info('Role is: ' + role)
+        if role == 'seller':
+            logging.info('User is in seller mode.')
+            print('You are in seller mode.')
+            break
+        elif role == 'manager':
+            logging.info('User in manager mode.')
+            print('You are in manager mode.')
+            break
+        else:
+            logging.error('User has unexpected role: ' + role)
+            print('Role is wrong!')
+            break
+
     db_utils.close_db_connection(connection)
-elif role == 'manager':
-    print('You are in manager mode.')
-else :
-    print('Role is wrong!')
+
+
+if __name__ == '__main__':
+    main()

@@ -5,6 +5,16 @@ import os
 import json
 
 
+def seller_interactions():
+    print('You are in seller mode.')
+    return
+
+
+def manager_interactions():
+    print('You are in manager mode.')
+    return
+
+
 def main():
     # Create directory for log file if it is not exists
     directory = os.path.dirname(os.path.realpath(__file__)) + '/log'
@@ -31,11 +41,11 @@ def main():
         logging.info('Role is: ' + role)
         if role == 'seller':
             logging.info('User is in seller mode.')
-            print('You are in seller mode.')
+            seller_interactions()
             break
         elif role == 'manager':
             logging.info('User in manager mode.')
-            print('You are in manager mode.')
+            manager_interactions()
             break
         else:
             logging.error('User has unexpected role: ' + role)

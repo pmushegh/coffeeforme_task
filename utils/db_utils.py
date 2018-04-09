@@ -65,7 +65,7 @@ class DBUtils:
         try:
             sql = 'CREATE TABLE `coffeeformedb`.`sales` (`seller_name` VARCHAR(100) NOT NULL,' \
                   '`number_of_sales` INT NOT NULL,' \
-                  '`total_value` DECIMAL NOT NULL,PRIMARY KEY (`seller_name`));'
+                  '`total_value` DOUBLE NOT NULL,PRIMARY KEY (`seller_name`));'
             db_cursor = self.db_connection.cursor()
             db_cursor.execute(sql)
             db_cursor.close()
@@ -90,3 +90,8 @@ class DBUtils:
             db_cursor.close()
             return False
 
+    def get_data_from_sales_table(self):
+        db_cursor = self.db_connection.cursor()
+        db_cursor.execute('SELECT * FROM sales')
+        result = db_cursor.fetchone()
+        return

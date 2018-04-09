@@ -26,12 +26,19 @@ def main():
     logging.basicConfig(**logging_config)
 
     # Setup DB connection.
-    connection = db_utils.open_db_connection()
-    if connection is None:
+    db_connection = db_utils.DBUtils()
+    if not db_connection.open_db_connection():
         logging.error('No DB connection is established.')
-        print('Something went wrong during DB connection, please check log.'
+        print('Problems with DB, please check log.'
               '\nApplication will exit now.')
         return
+    if not db_connection.check_db():
+        logging.error('Problems during DB check, please check log.')
+        print('Problems during DB check, please check log.'
+              '\nApplication will exit now.')
+        return
+    if not db_connection.check_sales_table():
+        logging.error('Problems with Sales table, please check log.')
 
     while True:
         user_name = input('Welcome to CoffeeForMe seller/manager system!'
@@ -52,7 +59,8 @@ def main():
             print('Role is wrong!')
             break
 
-    db_utils.close_db_connection(connection)
+    db_connection.close_db_connection()
+    return
 
 
 if __name__ == '__main__':

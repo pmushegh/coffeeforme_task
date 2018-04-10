@@ -63,8 +63,8 @@ class DBUtils:
 
     def create_sales_table(self):
         try:
-            sql = 'CREATE TABLE `coffeeformedb`.`sales` (`seller_name` VARCHAR(100) NOT NULL,' \
-                  '`number_of_sales` INT NOT NULL,' \
+            sql = 'CREATE TABLE `' + self.db_configuration['database'] + '`.`sales` ' \
+                  '(`seller_name` VARCHAR(40) NOT NULL,`number_of_sales` INT NOT NULL,' \
                   '`total_value` DOUBLE NOT NULL,PRIMARY KEY (`seller_name`));'
             db_cursor = self.db_connection.cursor()
             db_cursor.execute(sql)
@@ -80,8 +80,8 @@ class DBUtils:
         logging.info('DB connection closed.')
 
     def create_db_schema(self, db_name):
-        db_cursor = self.db_connection.cursor()
         try:
+            db_cursor = self.db_connection.cursor()
             db_cursor.execute('CREATE SCHEMA ' + db_name)
             db_cursor.close()
             return True
@@ -91,7 +91,45 @@ class DBUtils:
             return False
 
     def get_data_from_sales_table(self):
-        db_cursor = self.db_connection.cursor()
-        db_cursor.execute('SELECT * FROM sales')
-        result = db_cursor.fetchone()
-        return
+        try:
+            db_cursor = self.db_connection.cursor()
+            db_cursor.execute('SELECT * FROM sales')
+            result = db_cursor.fetchall()
+            db_cursor.close()
+            return result
+        except mysql.connector.Error as err:
+            logging.error('Problems during getting Sales table data: ' + err.msg)
+            return None
+
+    def add_empty_seller_to_db(self, seller_name):
+        try:
+            sql = 'INSERT INTO `' + self.db_configuration['database'] + '`.`sales` (`seller_name`,' \
+                  ' `number_of_sales`, `total_value`) VALUES (\'' + seller_name + '\', \'0\', \'0\')'
+            db_cursor = self.db_connection.cursor()
+            db_cursor.execute(sql)
+            db_cursor.close()
+            self.db_connection.commit()
+            logging.info('Seller ' + seller_name + ' empty data added to DB.')
+            return True
+        except mysql.connector.Error as err:
+            logging.error('Error during empty seller adding to DB: ' + err.msg)
+            return False
+
+    def check_seller_existence(self, seller_name):
+        try:
+            sql = 'SELECT COUNT(*) FROM sales WHERE seller_name="' + seller_name + '"'
+            db_cursor = self.db_connection.cursor()
+            db_cursor.execute(sql)
+            record_number = db_cursor.fetchone()[0]
+            db_cursor.close()
+            if record_number == 1:
+                logging.info('User with name - ' + seller_name + ' exists, no need in new record creation.')
+            else:
+                logging.info('Adding user - ' + seller_name + ' to DB.')
+                if not self.add_empty_seller_to_db(seller_name):
+                    return False
+            return True
+        except mysql.connector.Error as err:
+            logging.error('Some problems during user existence check: ' + err.msg)
+            db_cursor.close()
+            return False

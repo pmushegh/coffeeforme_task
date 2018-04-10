@@ -9,6 +9,8 @@ def seller_interactions(db_connection, seller_name):
     print('You are in seller mode.')
     if not db_connection.check_seller_existence(seller_name):
         return
+    if not db_connection.update_seller_sale_statistics(seller_name, 20.3, 10):
+        return
     return
 
 

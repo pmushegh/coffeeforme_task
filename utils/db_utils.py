@@ -141,11 +141,9 @@ class DBUtils:
 
     def update_seller_sale_statistics(self, seller_name, value, count=1):
         try:
-            sql = 'SELECT `number_of_sales`, `total_value` INTO @sale_count, @total_value ' \
-                  'FROM `sales` WHERE `seller_name`="' + seller_name + '";' \
-                  'UPDATE `sales` SET `number_of_sales`=@sale_count+' + str(count) + ', ' \
-                  '`total_value`=@total_value+' + str(value) + ' ' \
-                  'WHERE `seller_name`="' + seller_name + '";'
+            sql = 'UPDATE `sales` SET `number_of_sales` = `number_of_sales` + ' + str(count) + ', ' \
+                  '`total_value` = `total_value` + ' + str(value) + ' ' \
+                  'WHERE `seller_name`="' + seller_name + '"'
             db_cursor = self.db_connection.cursor()
             db_cursor.execute(sql)
             db_cursor.close()

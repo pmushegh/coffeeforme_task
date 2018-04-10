@@ -61,10 +61,14 @@ def main():
     if not db_connection.check_sales_table():
         logging.error('Problems with Sales table, please check log.')
 
+    print('Welcome to CoffeeForMe seller/manager system!')
     while True:
-        user_name = input('Welcome to CoffeeForMe seller/manager system!'
-                          '\nInput your user name: ')
+        user_name = input('Input your user name: ')
         logging.info('User name is: ' + user_name)
+        if len(user_name) > 40:
+            logging.warning('Long user name: ' + user_name)
+            print('Please input user name one more time, too long one.')
+            continue
         role = input('Input your role(seller/manager): ')
         logging.info('Role is: ' + role)
         if role == 'seller':

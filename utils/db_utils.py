@@ -31,7 +31,9 @@ class DBUtils:
 
     def check_db(self) -> bool:
         try:
+            logging.info('Setting DB name for connection.')
             self.db_connection.database = self.db_configuration['database']
+            logging.info('DB name for connection set.')
             return True
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_BAD_DB_ERROR:
@@ -41,9 +43,13 @@ class DBUtils:
                                                              host=self.db_configuration['host'])
                 logging.info('Creating DB ' + self.db_configuration['database'])
                 if self.create_db_schema(self.db_configuration['database']):
+                    logging.info('DB created.')
+                    logging.info('Setting DB name for connection.')
                     self.db_connection.database = self.db_configuration['database']
+                    logging.info('DB name for connection set.')
                     return True
                 else:
+                    logging.error('DB not created.')
                     return False
             else:
                 logging.error('Some unexpected error during DB creation:"\n' + traceback.format_exc())
@@ -51,11 +57,13 @@ class DBUtils:
 
     def check_sales_table(self) -> bool:
         try:
+            logging.info('Sales table check start.')
             sql = 'SELECT COUNT(*) FROM information_schema.tables WHERE table_name="sales"'
             db_cursor = self.db_connection.cursor()
             db_cursor.execute(sql)
             if db_cursor.fetchone()[0] == 1:
                 db_cursor.close()
+                logging.info("Sales table is in place.")
                 return True
             else:
                 if self.create_sales_table():
@@ -76,7 +84,7 @@ class DBUtils:
             db_cursor.execute(sql)
             db_cursor.close()
             self.db_connection.commit()
-            logging.info('Salas table created.')
+            logging.info('Sales table created.')
             return True
         except mysql.connector.Error:
             logging.error('Some unexpected error during Sales table creation:"\n' + traceback.format_exc())

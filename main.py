@@ -1,39 +1,18 @@
 from utils import db_utils
+from classes import manager, seller
 
 import logging
 import os
 import json
 
 
-def seller_interactions(db_connection, seller_name):
-    print('You are in seller mode.')
-    if not db_connection.check_seller_existence(seller_name):
-        return
-    if not db_connection.update_seller_sale_statistics(seller_name, 20.3, 10):
-        return
-    return
-
-
-def manager_interactions(db_connection):
-    print('You are in manager mode.')
-    all_sale_data = db_connection.get_data_from_sales_table()
-    if all_sale_data is None:
-        print('Problems with getting sales data.'
-              '\nApplication will exit now.')
-    else:
-        total_sales_value = 0.0
-        print('|' + '-' * 82 + '|')
-        print('|Sales data:' + ' ' * 71 + '|')
-        print('|' + '-' * 82 + '|')
-        print('|{0:40}|{1:20}|{2:20}|'.format('Seller name', 'Number of sales', 'Total Value ($)'))
-        print('|' + '-' * 82 + '|')
-        for seller, sales_num, total_value in all_sale_data:
-            total_sales_value += total_value
-            print('|{0:40}|{1:20d}|{2:20}|'.format(seller, sales_num, total_value))
-            print('|' + '-' * 82 + '|')
-        print('|'+' ' * 40 + '|' + ' ' * 20 + '|{0:20}|'.format('Total:' + str(total_sales_value)))
-        print('|' + '-' * 82 + '|')
-    return
+def input_s(message=''):
+    temp = input(message)
+    if temp == 'exit':
+        print('Application will exit now.')
+        logging.info('Exiting application after "exit" command.')
+        exit()
+    return temp
 
 
 def main():
@@ -48,36 +27,33 @@ def main():
 
     # Setup DB connection.
     db_connection = db_utils.DBUtils()
-    if not db_connection.open_db_connection():
-        logging.error('No DB connection is established.')
+    logging.info('Preparing DB staff.')
+    if not db_connection.prepare_db_connection():
         print('Problems with DB, please check log.'
               '\nApplication will exit now.')
+        logging.error('Exiting application because of DB problems.')
         return
-    if not db_connection.check_db():
-        logging.error('Problems during DB check, please check log.')
-        print('Problems during DB check, please check log.'
-              '\nApplication will exit now.')
-        return
-    if not db_connection.check_sales_table():
-        logging.error('Problems with Sales table, please check log.')
 
-    print('Welcome to CoffeeForMe seller/manager system!')
+    print('Welcome to CoffeeForMe seller/manager system!\n'
+          'To exit any time type "exit".')
     while True:
-        user_name = input('Input your user name: ')
+        user_name = input_s('Input your user name: ')
         logging.info('User name is: ' + user_name)
         if len(user_name) > 40:
             logging.warning('Long user name: ' + user_name)
             print('Please input user name one more time, too long one.')
             continue
-        role = input('Input your role(seller/manager): ')
+        role = input_s('Input your role(seller/manager): ')
         logging.info('Role is: ' + role)
         if role == 'seller':
             logging.info('User is in seller mode.')
-            seller_interactions(db_connection, user_name)
+            user_seller = seller.Seller(user_name)
+            user_seller.interactions(db_connection)
             break
         elif role == 'manager':
             logging.info('User in manager mode.')
-            manager_interactions(db_connection)
+            user_manager = manager.Manager(user_name)
+            user_manager.interactions(db_connection)
             break
         else:
             logging.error('User has unexpected role: ' + role)

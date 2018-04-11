@@ -8,13 +8,15 @@ from mysql.connector import errorcode
 
 class DBUtils:
     def __init__(self):
+        logging.info('Reading DB configuration.')
         self.db_configuration = json.load(open('configurations/db.json'))
         logging.info('DB connection configuration is: ')
         logging.info(self.db_configuration)
         self.db_connection = mysql.connector.MySQLConnection()
 
-    def open_db_connection(self):
+    def open_db_connection(self) -> bool:
         try:
+            logging.info('Establishing connection to MySQL.')
             self.db_connection = mysql.connector.connect(user=self.db_configuration['user'],
                                                          password=self.db_configuration['password'],
                                                          host=self.db_configuration['host'])
@@ -27,7 +29,7 @@ class DBUtils:
                 logging.error('Some unexpected error during connection to MySQL:"\n' + traceback.format_exc())
             return False
 
-    def check_db(self):
+    def check_db(self) -> bool:
         try:
             self.db_connection.database = self.db_configuration['database']
             return True
@@ -47,7 +49,7 @@ class DBUtils:
                 logging.error('Some unexpected error during DB creation:"\n' + traceback.format_exc())
                 return False
 
-    def check_sales_table(self):
+    def check_sales_table(self) -> bool:
         try:
             sql = 'SELECT COUNT(*) FROM information_schema.tables WHERE table_name="sales"'
             db_cursor = self.db_connection.cursor()
@@ -65,7 +67,7 @@ class DBUtils:
             logging.error('Some unexpected error during Sales table check:"\n' + traceback.format_exc())
             return False
 
-    def create_sales_table(self):
+    def create_sales_table(self) -> bool:
         try:
             sql = 'CREATE TABLE `sales` ' \
                   '(`seller_name` VARCHAR(40) NOT NULL,`number_of_sales` INT NOT NULL,' \
@@ -83,8 +85,9 @@ class DBUtils:
     def close_db_connection(self):
         self.db_connection.close()
         logging.info('DB connection closed.')
+        return
 
-    def create_db_schema(self, db_name):
+    def create_db_schema(self, db_name) -> bool:
         try:
             db_cursor = self.db_connection.cursor()
             db_cursor.execute('CREATE SCHEMA ' + db_name)
@@ -95,7 +98,7 @@ class DBUtils:
             db_cursor.close()
             return False
 
-    def get_data_from_sales_table(self):
+    def get_data_from_sales_table(self) -> list:
         try:
             db_cursor = self.db_connection.cursor()
             db_cursor.execute('SELECT * FROM sales')
@@ -106,7 +109,7 @@ class DBUtils:
             logging.error('Problems during getting Sales table data:"\n' + traceback.format_exc())
             return None
 
-    def add_empty_seller_to_db(self, seller_name):
+    def add_empty_seller_to_db(self, seller_name) -> bool:
         try:
             sql = 'INSERT INTO `sales` (`seller_name`,' \
                   ' `number_of_sales`, `total_value`) VALUES (\'' + seller_name + '\', \'0\', \'0\')'
@@ -120,7 +123,7 @@ class DBUtils:
             logging.error('Error during empty seller adding to DB:"\n' + traceback.format_exc())
             return False
 
-    def check_seller_existence(self, seller_name):
+    def check_seller_existence(self, seller_name) -> bool:
         try:
             sql = 'SELECT COUNT(*) FROM sales WHERE `sales`.`seller_name`="' + seller_name + '"'
             db_cursor = self.db_connection.cursor()
@@ -139,11 +142,11 @@ class DBUtils:
             db_cursor.close()
             return False
 
-    def update_seller_sale_statistics(self, seller_name, value, count=1):
+    def update_seller_sale_statistics(self, seller_name, value, count=1) -> bool:
         try:
             sql = 'UPDATE `sales` SET `number_of_sales` = `number_of_sales` + ' + str(count) + ', ' \
-                  '`total_value` = `total_value` + ' + str(value) + ' ' \
-                  'WHERE `seller_name`="' + seller_name + '"'
+                    '`total_value` = `total_value` + ' + str(value) + ' ' \
+                    'WHERE `seller_name`="' + seller_name + '"'
             db_cursor = self.db_connection.cursor()
             db_cursor.execute(sql)
             db_cursor.close()
@@ -152,3 +155,18 @@ class DBUtils:
         except mysql.connector.Error:
             logging.error('Unexpected error during Sales table update:\n' + traceback.format_exc())
             return False
+
+    def prepare_db_connection(self) -> bool:
+        if not self.open_db_connection():
+            logging.error('No DB connection is established.')
+            return False
+        if not self.check_db():
+            logging.error('Problems during DB check, please check log.')
+            print('Problems during DB check, please check log.'
+                  '\nApplication will exit now.')
+            return False
+        if not self.check_sales_table():
+            logging.error('Problems with Sales table, please check log.')
+            return False
+        return True
+

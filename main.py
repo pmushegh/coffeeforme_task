@@ -15,7 +15,7 @@ def input_s(message=''):
     return temp
 
 
-def main():
+def init_log():
     # Create directory for log file if it is not exists
     directory = os.path.dirname(os.path.realpath(__file__)) + '/log'
     if not os.path.exists(directory):
@@ -24,6 +24,10 @@ def main():
     # Setup logging parameters.
     logging_config = json.load(open('configurations/log.json'))
     logging.basicConfig(**logging_config)
+
+
+def main():
+    init_log()
 
     # Setup DB connection.
     db_connection = db_utils.DBUtils()

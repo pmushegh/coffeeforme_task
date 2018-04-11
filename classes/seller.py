@@ -43,13 +43,15 @@ class Seller(employee.Employee):
         coffee_add_on_types_message = coffee_add_on_types_message[:-2] + ').\n'
         coffee_add_on_types_message += 'Add-ons should be separated by ","(exp. "sugar,milk"):'
         coffee_add_ons = input_s(coffee_add_on_types_message)
-        coffee_add_ons = coffee_add_ons.split(',')
-        add_ons_price = self.check_inputted_add_ons_and_get_total_price(coffee_add_ons)
-        if add_ons_price is None:
-            logging.error('Problems with add-ons.')
-            return
-        else:
-            total_price += add_ons_price
+        if coffee_add_ons != '':
+            coffee_add_ons = coffee_add_ons.split(',')
+            add_ons_price = self.check_inputted_add_ons_and_get_total_price(coffee_add_ons)
+            if add_ons_price is None:
+                logging.error('Problems with add-ons.')
+                print('Problem with add-ons.')
+                return
+            else:
+                total_price += add_ons_price
 
         print('For showing sale total price type "price",\n'
               'to save sale - "save", to finish interactions "end"')

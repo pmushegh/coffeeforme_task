@@ -1,5 +1,6 @@
 from utils import db_utils
-from classes import manager, seller
+from classes import manager
+from classes import seller
 
 import logging
 import os

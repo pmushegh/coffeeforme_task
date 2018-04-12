@@ -50,6 +50,7 @@ class DBUtils:
                     return True
                 else:
                     logging.error('DB not created.')
+                    self.db_connection.close()
                     return False
             else:
                 logging.error('Some unexpected error during DB creation:"\n' + traceback.format_exc())
@@ -70,6 +71,7 @@ class DBUtils:
                     db_cursor.close()
                     return True
                 else:
+                    self.db_connection.close()
                     return False
         except mysql.connector.Error:
             logging.error('Some unexpected error during Sales table check:"\n' + traceback.format_exc())

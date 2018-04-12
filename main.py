@@ -6,12 +6,14 @@ import logging
 import os
 import json
 
+logger = logging.getLogger(__name__)
+
 
 def input_s(message=''):
     temp = input(message)
     if temp == 'exit':
         print('Application will exit now.')
-        logging.info('Exiting application after "exit" command.')
+        logger.info('Exiting application after "exit" command.')
         exit()
     return temp
 
@@ -32,36 +34,36 @@ def main():
 
     # Setup DB connection.
     db_connection = db_utils.DBUtils()
-    logging.info('Preparing DB staff.')
+    logger.info('Preparing DB staff.')
     if not db_connection.prepare_db_connection():
         print('Problems with DB, please check log.'
               '\nApplication will exit now.')
-        logging.error('Exiting application because of DB problems.')
+        logger.error('Exiting application because of DB problems.')
         return
 
     print('Welcome to CoffeeForMe seller/manager system!\n'
           'To exit any time type "exit".')
     while True:
         user_name = input_s('Input your user name: ')
-        logging.info('User name is: ' + user_name)
+        logger.info('User name is: ' + user_name)
         if len(user_name) > 40:
-            logging.warning('Long user name: ' + user_name)
+            logger.warning('Long user name: ' + user_name)
             print('Please input user name one more time, too long one.')
             continue
         role = input_s('Input your role(seller/manager): ')
-        logging.info('Role is: ' + role)
+        logger.info('Role is: ' + role)
         if role == 'seller':
-            logging.info('User is in seller mode.')
+            logger.info('User is in seller mode.')
             user_seller = seller.Seller(user_name)
             user_seller.interactions(db_connection)
             break
         elif role == 'manager':
-            logging.info('User in manager mode.')
+            logger.info('User in manager mode.')
             user_manager = manager.Manager(user_name)
             user_manager.interactions(db_connection)
             break
         else:
-            logging.error('User has unexpected role: ' + role)
+            logger.error('User has unexpected role: ' + role)
             print('Role is wrong!')
             break
 

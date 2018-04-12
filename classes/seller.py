@@ -1,8 +1,10 @@
 from classes import employee
-
 from main import input_s
+
 import json
 import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Seller(employee.Employee):
@@ -12,7 +14,7 @@ class Seller(employee.Employee):
         self.coffee_add_on_types = dict()
 
     def interactions(self, db_connection):
-        logging.info('Reading coffee and add-on types configuration.')
+        logger.info('Reading coffee and add-on types configuration.')
         self.coffee_types = json.load(open("configurations/coffee_types.json"))
         self.coffee_add_on_types = json.load(open("configurations/coffee_add_on_types.json"))
         total_price = 0.0
@@ -31,7 +33,7 @@ class Seller(employee.Employee):
         coffee_type_price = self.coffee_types.get(coffee_type)
         if coffee_type_price is None:
             print('Wrong coffee type is selected.')
-            logging.error('Unknown coffee type was selected.')
+            logger.error('Unknown coffee type was selected.')
             return
         else:
             total_price += self.coffee_types.get(coffee_type)
@@ -47,7 +49,7 @@ class Seller(employee.Employee):
             coffee_add_ons = coffee_add_ons.split(',')
             add_ons_price = self.check_inputted_add_ons_and_get_total_price(coffee_add_ons)
             if add_ons_price is None:
-                logging.error('Problems with add-ons.')
+                logger.error('Problems with add-ons.')
                 print('Problem with add-ons.')
                 return
             else:
@@ -58,20 +60,20 @@ class Seller(employee.Employee):
         while True:
             operation = input_s()
             if operation == 'price':
-                logging.info('Showing price.')
+                logger.info('Showing price.')
                 print('Price is ' + str(total_price))
             elif operation == 'save':
-                logging.info('Saving sale to DB.')
+                logger.info('Saving sale to DB.')
                 if not db_connection.update_seller_sale_statistics(self.name, total_price):
                     return
                 print('Sale saved to DB.')
                 return
             elif operation == 'end':
-                logging.info('Exiting seller interactions.')
+                logger.info('Exiting seller interactions.')
                 print('Exiting seller interactions.')
                 return
             else:
-                logging.info('Unknown operation is provided: ' + operation)
+                logger.info('Unknown operation is provided: ' + operation)
                 print('Wrong operation!')
         return
 
@@ -81,7 +83,7 @@ class Seller(employee.Employee):
             price = self.coffee_add_on_types.get(add_on_item)
             # with self.coffee_add_on_types.get(add_on_item) as price:
             if price is None:
-                logging.error('Unknown add-on: ' + add_on_item)
+                logger.error('Unknown add-on: ' + add_on_item)
                 return None
             else:
                 total_price += price

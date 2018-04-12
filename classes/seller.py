@@ -19,6 +19,39 @@ class Seller(employee.Employee):
         self.coffee_add_on_types = json.load(open("configurations/coffee_add_on_types.json"))
         return
 
+    def get_add_ons_price(self, coffee_add_ons) -> float:
+        total_price = 0
+        if coffee_add_ons != '':
+            coffee_add_ons = coffee_add_ons.split(',')
+            add_ons_price = self.check_inputted_add_ons_and_get_total_price(coffee_add_ons)
+            if add_ons_price is None:
+                logger.error('Problems with add-ons.')
+                return None
+            else:
+                total_price += add_ons_price
+            return total_price
+        else:
+            return 0.0
+
+    def perform_action(self, action, db_connection, total_price) -> bool:
+        if action == 'price':
+            logger.info('Showing price.')
+            print('Price is ' + str(total_price))
+        elif action == 'save':
+            logger.info('Saving sale to DB.')
+            if not db_connection.update_seller_sale_statistics(self.name, total_price):
+                return False
+            print('Sale saved to DB.')
+            return False
+        elif action == 'end':
+            logger.info('Exiting seller interactions.')
+            print('Exiting seller interactions.')
+            return False
+        else:
+            logger.info('Unknown action is provided: ' + action)
+            print('Wrong action!')
+        return True
+
     def interactions_silent(self, db_connection, args):
         self.read_configs()
         total_price = 0.0
@@ -37,33 +70,17 @@ class Seller(employee.Employee):
             total_price += self.coffee_types.get(args.coffee_type)
 
         # Coffee add-on selection
-        if args.coffee_add_ons != '':
-            args.coffee_add_ons = args.coffee_add_ons.split(',')
-            add_ons_price = self.check_inputted_add_ons_and_get_total_price(args.coffee_add_ons)
-            if add_ons_price is None:
-                logger.error('Problems with add-ons.')
-                print('Problem with add-ons.')
-                return
-            else:
-                total_price += add_ons_price
-
-        if args.action == 'price':
-            logger.info('Showing price.')
-            print('Price is ' + str(total_price))
-        elif args.action == 'save':
-            logger.info('Saving sale to DB.')
-            if not db_connection.update_seller_sale_statistics(self.name, total_price):
-                return
-            print('Sale saved to DB.')
-            return
-        elif args.action == 'end':
-            logger.info('Exiting seller interactions.')
-            print('Exiting seller interactions.')
+        logger.info('Getting add-ons price')
+        add_ons_price = self.get_add_ons_price(args.coffee_add_ons)
+        if add_ons_price is None:
+            print('Problem with add-ons.')
             return
         else:
-            logger.info('Unknown action is provided: ' + args.action)
-            print('Wrong action!')
-            return
+            total_price += add_ons_price
+
+        self.perform_action(args.action, db_connection, total_price)
+
+        return
 
     def interactions(self, db_connection):
         self.read_configs()
@@ -95,36 +112,21 @@ class Seller(employee.Employee):
         coffee_add_on_types_message = coffee_add_on_types_message[:-2] + ').\n'
         coffee_add_on_types_message += 'Add-ons should be separated by ","(exp. "sugar,milk"):'
         coffee_add_ons = input_s(coffee_add_on_types_message)
-        if coffee_add_ons != '':
-            coffee_add_ons = coffee_add_ons.split(',')
-            add_ons_price = self.check_inputted_add_ons_and_get_total_price(coffee_add_ons)
-            if add_ons_price is None:
-                logger.error('Problems with add-ons.')
-                print('Problem with add-ons.')
-                return
-            else:
-                total_price += add_ons_price
+        logger.info('Getting add-ons price')
+        add_ons_price = self.get_add_ons_price(coffee_add_ons)
+        if add_ons_price is None:
+            print('Problem with add-ons.')
+            return
+        else:
+            total_price += add_ons_price
 
         print('For showing sale total price type "price",\n'
               'to save sale - "save", to finish interactions "end"')
-        action = input_s()
-        if action == 'price':
-            logger.info('Showing price.')
-            print('Price is ' + str(total_price))
-        elif action == 'save':
-            logger.info('Saving sale to DB.')
-            if not db_connection.update_seller_sale_statistics(self.name, total_price):
+        while True:
+            action = input_s()
+            if not self.perform_action(action, db_connection, total_price):
                 return
-            print('Sale saved to DB.')
-            return
-        elif action == 'end':
-            logger.info('Exiting seller interactions.')
-            print('Exiting seller interactions.')
-            return
-        else:
-            logger.info('Unknown action is provided: ' + action)
-            print('Wrong action!')
-            return
+        return
 
     def check_inputted_add_ons_and_get_total_price(self, add_ons) -> float:
         total_price = 0.0

@@ -6,3 +6,6 @@ class Employee:
     def interactions(self, db_connection):
         pass
 
+    def interactions_silent(self, db_connection, args):
+        pass
+

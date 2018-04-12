@@ -9,6 +9,9 @@ class Manager(employee.Employee):
     def __init__(self, name):
         super().__init__(name, 'manager')
 
+    def interactions_silent(self, db_connection, args=None):
+        self.interactions(db_connection)
+
     def interactions(self, db_connection):
         print('You are in manager mode.')
         logger.info('Getting sale data.')

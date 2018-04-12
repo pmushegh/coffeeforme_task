@@ -13,10 +13,60 @@ class Seller(employee.Employee):
         self.coffee_types = dict()
         self.coffee_add_on_types = dict()
 
-    def interactions(self, db_connection):
+    def read_configs(self):
         logger.info('Reading coffee and add-on types configuration.')
         self.coffee_types = json.load(open("configurations/coffee_types.json"))
         self.coffee_add_on_types = json.load(open("configurations/coffee_add_on_types.json"))
+        return
+
+    def interactions_silent(self, db_connection, args):
+        self.read_configs()
+        total_price = 0.0
+
+        if not db_connection.check_seller_existence(self.name):
+            print('Problems with user check, see log for more details.')
+            return
+
+        # Coffee selection
+        coffee_type_price = self.coffee_types.get(args.coffee_type)
+        if coffee_type_price is None:
+            print('Wrong coffee type is selected.')
+            logger.error('Unknown coffee type was selected.')
+            return
+        else:
+            total_price += self.coffee_types.get(args.coffee_type)
+
+        # Coffee add-on selection
+        if args.coffee_add_ons != '':
+            args.coffee_add_ons = args.coffee_add_ons.split(',')
+            add_ons_price = self.check_inputted_add_ons_and_get_total_price(args.coffee_add_ons)
+            if add_ons_price is None:
+                logger.error('Problems with add-ons.')
+                print('Problem with add-ons.')
+                return
+            else:
+                total_price += add_ons_price
+
+        if args.action == 'price':
+            logger.info('Showing price.')
+            print('Price is ' + str(total_price))
+        elif args.action == 'save':
+            logger.info('Saving sale to DB.')
+            if not db_connection.update_seller_sale_statistics(self.name, total_price):
+                return
+            print('Sale saved to DB.')
+            return
+        elif args.action == 'end':
+            logger.info('Exiting seller interactions.')
+            print('Exiting seller interactions.')
+            return
+        else:
+            logger.info('Unknown action is provided: ' + args.action)
+            print('Wrong action!')
+            return
+
+    def interactions(self, db_connection):
+        self.read_configs()
         total_price = 0.0
 
         print('You are in seller mode.')
@@ -57,25 +107,24 @@ class Seller(employee.Employee):
 
         print('For showing sale total price type "price",\n'
               'to save sale - "save", to finish interactions "end"')
-        while True:
-            operation = input_s()
-            if operation == 'price':
-                logger.info('Showing price.')
-                print('Price is ' + str(total_price))
-            elif operation == 'save':
-                logger.info('Saving sale to DB.')
-                if not db_connection.update_seller_sale_statistics(self.name, total_price):
-                    return
-                print('Sale saved to DB.')
+        action = input_s()
+        if action == 'price':
+            logger.info('Showing price.')
+            print('Price is ' + str(total_price))
+        elif action == 'save':
+            logger.info('Saving sale to DB.')
+            if not db_connection.update_seller_sale_statistics(self.name, total_price):
                 return
-            elif operation == 'end':
-                logger.info('Exiting seller interactions.')
-                print('Exiting seller interactions.')
-                return
-            else:
-                logger.info('Unknown operation is provided: ' + operation)
-                print('Wrong operation!')
-        return
+            print('Sale saved to DB.')
+            return
+        elif action == 'end':
+            logger.info('Exiting seller interactions.')
+            print('Exiting seller interactions.')
+            return
+        else:
+            logger.info('Unknown action is provided: ' + action)
+            print('Wrong action!')
+            return
 
     def check_inputted_add_ons_and_get_total_price(self, add_ons) -> float:
         total_price = 0.0

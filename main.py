@@ -11,6 +11,41 @@ import traceback
 logger = logging.getLogger(__name__)
 
 
+def init_argument_parser():
+    parser = argparse.ArgumentParser(description='CoffeeForMe application.')
+    parser.add_argument('-n', '--name',
+                        dest='name',
+                        type=str,
+                        help='User name')
+    parser.add_argument('-r', '--role',
+                        dest='role',
+                        type=str,
+                        help='User role')
+    parser.add_argument('-c_t', '--coffee_type',
+                        dest='coffee_type',
+                        type=str,
+                        help='Coffee type')
+    parser.add_argument('-c_as', '--coffee_add_ons',
+                        dest='coffee_add_ons',
+                        type=str,
+                        help='Coffee add-ons type')
+    parser.add_argument('-a', '--action',
+                        dest='action',
+                        type=str,
+                        help='Seller action[price/save/end]')
+    return parser
+
+
+def parse_arguments(parser):
+    try:
+        args_temp = parser.parse_args()
+    except SystemExit:
+        logger.error('Unable to parse command line arguments: ' + traceback.format_exc())
+        print('Problems with commandline arguments parsing, see log for details.')
+        exit(1)
+    return args_temp
+
+
 def input_s(message=''):
     temp = input(message)
     if temp == 'exit':
@@ -34,6 +69,10 @@ def init_log():
 
 def commandline_working_mode(args, db_connection):
     logger.info('Application entered commandline working mode.')
+    if args.role is None:
+        print('--role commandline argument is not provided.')
+        logger.error('--role commandline argument is not provided.')
+        return
     if args.role == 'seller':
         logger.info('User is in seller mode.')
         user_seller = seller.Seller(args.name)
@@ -80,7 +119,11 @@ def interactive_working_mode(db_connection):
     return
 
 
-def main(args):
+def main():
+    init_log()
+
+    args = parse_arguments(init_argument_parser())
+
     # Setup DB connection.
     db_connection = db_utils.DBUtils()
     logger.info('Preparing DB staff.')
@@ -100,17 +143,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    init_log()
-    parser = argparse.ArgumentParser(description='CoffeeForMe application.')
-    parser.add_argument('-name', metavar='Name', type=str, help='User name')
-    parser.add_argument('-role', metavar='Role', type=str, help='User role')
-    parser.add_argument('-coffee_type', metavar='Coffee', type=str, help='Coffee type')
-    parser.add_argument('-coffee_add_ons', metavar='Coffee add-ons', type=str, help='Coffee add-ons type')
-    parser.add_argument('-action', metavar='Action', type=str, help='Seller action[price/save/end]')
-    try:
-        args_temp = parser.parse_args()
-    except SystemExit:
-        logger.error('Unable to parse command line arguments: ' + traceback.format_exc())
-        print('Problems with commandline arguments parsing, see log for details.')
-        exit(1)
-    main(args_temp)
+    main()

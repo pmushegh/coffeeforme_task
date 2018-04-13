@@ -8,6 +8,9 @@ from mysql.connector import errorcode
 
 class DBUtils:
     def __init__(self):
+        """
+        Reads json configuration for connection to MySQL DB.
+        """
         self.logger = logging.getLogger(__name__)
         self.logger.info('Reading DB configuration.')
         self.db_configuration = json.load(open('configurations/db.json'))
@@ -16,6 +19,10 @@ class DBUtils:
         self.db_connection = mysql.connector.MySQLConnection()
 
     def open_db_connection(self) -> bool:
+        """
+        Setups connection to MySQL DB.
+        :return: In case of success returns True, in case of any problem False.
+        """
         try:
             self.logger.info('Establishing connection to MySQL.')
             self.db_connection = mysql.connector.connect(user=self.db_configuration['user'],
@@ -31,6 +38,10 @@ class DBUtils:
             return False
 
     def check_db(self) -> bool:
+        """
+        Check connection to DB, in case of if DB not available calls create_db_schema().
+        :return: In case of success returns True, in case of any problem False.
+        """
         try:
             self.logger.info('Setting DB name for connection.')
             self.db_connection.database = self.db_configuration['database']
@@ -58,6 +69,10 @@ class DBUtils:
                 return False
 
     def check_sales_table(self) -> bool:
+        """
+        Check if "Sales" table is available, if not calls create_sales_table().
+        :return: In case of success returns True, in case of any problem False.
+        """
         try:
             self.logger.info('Sales table check start.')
             sql = 'SELECT COUNT(*) FROM information_schema.tables WHERE table_name="sales"'
@@ -79,6 +94,10 @@ class DBUtils:
             return False
 
     def create_sales_table(self) -> bool:
+        """
+        Creates sales table.
+        :return: In case of success returns True, in case of any problem False.
+        """
         try:
             sql = 'CREATE TABLE `sales` ' \
                   '(`seller_name` VARCHAR(40) NOT NULL,`number_of_sales` INT NOT NULL,' \
@@ -94,11 +113,19 @@ class DBUtils:
             return False
 
     def close_db_connection(self):
+        """
+        Close connection to MySQL.
+        :return:
+        """
         self.db_connection.close()
         self.logger.info('DB connection closed.')
         return
 
     def create_db_schema(self, db_name) -> bool:
+        """
+        Creates DB.
+        :return: In case of success returns True, in case of any problem False.
+        """
         try:
             db_cursor = self.db_connection.cursor()
             db_cursor.execute('CREATE SCHEMA ' + db_name)
@@ -110,6 +137,10 @@ class DBUtils:
             return False
 
     def get_data_from_sales_table(self) -> list:
+        """
+        Get all data from "Sales" table.
+        :return: retrieved data
+        """
         try:
             db_cursor = self.db_connection.cursor()
             db_cursor.execute('SELECT * FROM sales')
@@ -121,6 +152,11 @@ class DBUtils:
             return None
 
     def add_empty_seller_to_db(self, seller_name) -> bool:
+        """
+        Adds empty seller record.
+        :param seller_name:
+        :return:  In case of success returns True, in case of any problem False.
+        """
         try:
             sql = 'INSERT INTO `sales` (`seller_name`,' \
                   ' `number_of_sales`, `total_value`) VALUES (\'' + seller_name + '\', \'0\', \'0\')'
@@ -135,6 +171,11 @@ class DBUtils:
             return False
 
     def check_seller_existence(self, seller_name) -> bool:
+        """
+        Check if seller record exists in "Sales" table, if not calls add_empty_seller_to_db().
+        :param seller_name:
+        :return: In case of success returns True, in case of any problem False.
+        """
         try:
             sql = 'SELECT COUNT(*) FROM sales WHERE `sales`.`seller_name`="' + seller_name + '"'
             db_cursor = self.db_connection.cursor()
@@ -154,6 +195,13 @@ class DBUtils:
             return False
 
     def update_seller_sale_statistics(self, seller_name, value, count=1) -> bool:
+        """
+        Updates seller sale statistics in "Sales" table.
+        :param seller_name:
+        :param value: sale total value
+        :param count: sales count, default 1
+        :return: In case of success returns True, in case of any problem False.
+        """
         try:
             sql = 'UPDATE `sales` SET `number_of_sales` = `number_of_sales` + ' + str(count) + ', ' \
                     '`total_value` = `total_value` + ' + str(value) + ' ' \
@@ -168,6 +216,10 @@ class DBUtils:
             return False
 
     def prepare_db_connection(self) -> bool:
+        """
+        Opens DB connection and calls check_db(), check_sales_table().
+        :return: In case of success returns True, in case of any problem False.
+        """
         if not self.open_db_connection():
             self.logger.error('No DB connection is established.')
             return False

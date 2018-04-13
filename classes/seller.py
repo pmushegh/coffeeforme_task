@@ -8,18 +8,30 @@ logger = logging.getLogger(__name__)
 
 
 class Seller(employee.Employee):
+    """
+    Seller class extends Employee.
+    """
     def __init__(self, name):
         super().__init__(name, 'seller')
         self.coffee_types = dict()
         self.coffee_add_on_types = dict()
 
     def read_configs(self):
+        """
+        Initializes coffee_types and coffee_add_on_types based on json configs.
+        :return:
+        """
         logger.info('Reading coffee and add-on types configuration.')
         self.coffee_types = json.load(open("configurations/coffee_types.json"))
         self.coffee_add_on_types = json.load(open("configurations/coffee_add_on_types.json"))
         return
 
     def get_add_ons_price(self, coffee_add_ons) -> float:
+        """
+        Gets coffee add-ons total price, calls check_inputted_add_ons_and_get_total_price().
+        :param coffee_add_ons: coffee_add_ons string
+        :return: Coffee add-ons total price, in case of problem None.
+        """
         total_price = 0
         if coffee_add_ons != '':
             coffee_add_ons = coffee_add_ons.split(',')
@@ -34,6 +46,13 @@ class Seller(employee.Employee):
             return 0.0
 
     def perform_action(self, action, db_connection, total_price) -> bool:
+        """
+        Perform provide action(show sale price, save sale, exit).
+        :param action: action name(price, save, end)
+        :param db_connection: DBUtils type object
+        :param total_price: sale total price
+        :return: In case of success returns True, in case of any problem False.
+        """
         if action == 'price':
             logger.info('Showing price.')
             print('Price is ' + str(total_price))
@@ -53,6 +72,12 @@ class Seller(employee.Employee):
         return True
 
     def interactions_silent(self, db_connection, args):
+        """
+        Seller interaction base on commandline arguments.
+        :param db_connection: DBUtils type object
+        :param args: commandline arguments
+        :return:
+        """
         self.read_configs()
         total_price = 0.0
 
@@ -83,6 +108,11 @@ class Seller(employee.Employee):
         return
 
     def interactions(self, db_connection):
+        """
+        Seller interaction base on commandline user interactions.
+        :param db_connection: DBUtils type object
+        :return:
+        """
         self.read_configs()
         total_price = 0.0
 
@@ -129,10 +159,14 @@ class Seller(employee.Employee):
         return
 
     def check_inputted_add_ons_and_get_total_price(self, add_ons) -> float:
+        """
+        Calculated add-ons total price.
+        :param add_ons: add-ons list
+        :return: add-ons total price, in case of problem None.
+        """
         total_price = 0.0
         for add_on_item in add_ons:
             price = self.coffee_add_on_types.get(add_on_item)
-            # with self.coffee_add_on_types.get(add_on_item) as price:
             if price is None:
                 logger.error('Unknown add-on: ' + add_on_item)
                 return None

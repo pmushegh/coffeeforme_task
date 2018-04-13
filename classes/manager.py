@@ -6,13 +6,27 @@ logger = logging.getLogger(__name__)
 
 
 class Manager(employee.Employee):
+    """
+    Manager class extends Employee.
+    """
     def __init__(self, name):
         super().__init__(name, 'manager')
 
     def interactions_silent(self, db_connection, args=None):
+        """
+        Manager interaction base on commandline arguments, call interactions() because logic in this case is same.
+        :param db_connection: DBUtils type object
+        :param args: commandline arguments
+        :return:
+        """
         self.interactions(db_connection)
 
     def interactions(self, db_connection):
+        """
+        Manager interaction base on commandline user interactions.
+        :param db_connection: DBUtils type object
+        :return:
+        """
         print('You are in manager mode.')
         logger.info('Getting sale data.')
         all_sale_data = db_connection.get_data_from_sales_table()

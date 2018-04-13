@@ -12,6 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 def init_argument_parser():
+    """
+    Initializing argument parser for command line.
+    :return:
+    """
     parser = argparse.ArgumentParser(description='CoffeeForMe application.')
     parser.add_argument('-n', '--name',
                         dest='name',
@@ -37,6 +41,11 @@ def init_argument_parser():
 
 
 def parse_arguments(parser):
+    """
+    Parse commandline arguments. In case of problem during parsing triggers application exit.
+    :param parser: parser object
+    :return: parsed commandline arguments
+    """
     try:
         args_temp = parser.parse_args()
     except SystemExit:
@@ -47,15 +56,24 @@ def parse_arguments(parser):
 
 
 def input_s(message=''):
+    """
+    Reads value from console. In case of "exit" value throws UserWarning exception.
+    :param message: input message for input() function
+    :return: imputed value
+    """
     temp = input(message)
     if temp == 'exit':
         print('Application will exit now.')
         logger.info('Exiting application after "exit" command.')
-        exit()
+        raise UserWarning('Application exit on user demand.')
     return temp
 
 
 def init_log():
+    """
+    Initialized log configuration, and creates "log" folder.
+    :return:
+    """
     # Create directory for log file if it is not exists
     directory = os.path.dirname(os.path.realpath(__file__)) + '/log'
     if not os.path.exists(directory):
@@ -68,6 +86,12 @@ def init_log():
 
 
 def commandline_working_mode(args, db_connection):
+    """
+    Provides interactions with system based on commandline arguments.
+    :param args: commandline arguments
+    :param db_connection: DBUtils type object
+    :return:
+    """
     logger.info('Application entered commandline working mode.')
     if args.role is None:
         print('--role commandline argument is not provided.')
@@ -89,6 +113,11 @@ def commandline_working_mode(args, db_connection):
 
 
 def interactive_working_mode(db_connection):
+    """
+    Provides interactions with system based on commandline user interaction.
+    :param db_connection: DBUtils type object
+    :return:
+    """
     logger.info('Application entered interactive mode.')
     print('Welcome to CoffeeForMe seller/manager system!\n'
           'To exit any time type "exit".')
@@ -120,6 +149,10 @@ def interactive_working_mode(db_connection):
 
 
 def main():
+    """
+    Application base function.
+    :return:
+    """
     init_log()
 
     args = parse_arguments(init_argument_parser())
@@ -133,12 +166,16 @@ def main():
         logger.error('Exiting application because of DB problems.')
         return
 
-    if args.name is None:
-        interactive_working_mode(db_connection)
-    else:
-        commandline_working_mode(args, db_connection)
+    try:
+        if args.name is None:
+            interactive_working_mode(db_connection)
+        else:
+            commandline_working_mode(args, db_connection)
+        db_connection.close_db_connection()
+    except UserWarning as err:
+        logger.warning(err)
+        db_connection.close_db_connection()
 
-    db_connection.close_db_connection()
     return
 
 

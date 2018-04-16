@@ -36,7 +36,7 @@ class Manager(Employee):
         else:
             logger.info('Printing sales data.')
             total_sales_value = 0.0
-            print('|' + '-' * 82 + '||Sales data:' + ' ' * 71 + '||' + '-' * 82 + '|')
+            print('|' + '-' * 82 + '|\n|Sales data:' + ' ' * 71 + '|\n|' + '-' * 82 + '|')
             print('|{0:40}|{1:20}|{2:20}|'.format('Seller name', 'Number of sales', 'Total Value ($)'))
             print('|' + '-' * 82 + '|')
             for seller_name, sales_num, total_value in all_sale_data:

@@ -143,7 +143,7 @@ class DBUtils:
         """
         try:
             db_cursor = self.db_connection.cursor()
-            db_cursor.execute('SELECT * FROM sales')
+            db_cursor.execute('SELECT * FROM `sales` ORDER BY `sales`.`seller_name`')
             result = db_cursor.fetchall()
             db_cursor.close()
             return result

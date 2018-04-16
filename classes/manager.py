@@ -1,16 +1,16 @@
-from classes import employee
+from classes.employee import Employee
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class Manager(employee.Employee):
+class Manager(Employee):
     """
     Manager class extends Employee.
     """
     def __init__(self, name):
-        super().__init__(name, 'manager')
+        Employee.__init__(self, name, 'manager')
 
     def interactions_silent(self, db_connection, args=None):
         """
@@ -31,15 +31,12 @@ class Manager(employee.Employee):
         logger.info('Getting sale data.')
         all_sale_data = db_connection.get_data_from_sales_table()
         if all_sale_data is None:
-            print('Problems with getting sales data.'
-                  '\nApplication will exit now.')
+            print('Problems with getting sales data.\nApplication will exit now.')
             logger.error('Unable to retrieve sale data.')
         else:
             logger.info('Printing sales data.')
             total_sales_value = 0.0
-            print('|' + '-' * 82 + '|')
-            print('|Sales data:' + ' ' * 71 + '|')
-            print('|' + '-' * 82 + '|')
+            print('|' + '-' * 82 + '||Sales data:' + ' ' * 71 + '||' + '-' * 82 + '|')
             print('|{0:40}|{1:20}|{2:20}|'.format('Seller name', 'Number of sales', 'Total Value ($)'))
             print('|' + '-' * 82 + '|')
             for seller_name, sales_num, total_value in all_sale_data:

@@ -1,12 +1,13 @@
-from utils import db_utils
-from classes import manager
-from classes import seller
-
 import logging
 import os
 import json
 import argparse
 import traceback
+
+from utils.db_utils import DBUtils
+from utils.input_s import input_s
+from classes.manager import Manager
+from classes.seller import Seller
 
 logger = logging.getLogger(__name__)
 
@@ -55,20 +56,6 @@ def parse_arguments(parser):
     return args_temp
 
 
-def input_s(message=''):
-    """
-    Reads value from console. In case of "exit" value throws UserWarning exception.
-    :param message: input message for input() function
-    :return: imputed value
-    """
-    temp = input(message)
-    if temp == 'exit':
-        print('Application will exit now.')
-        logger.info('Exiting application after "exit" command.')
-        raise UserWarning('Application exit on user demand.')
-    return temp
-
-
 def init_log():
     """
     Initialized log configuration, and creates "log" folder.
@@ -99,11 +86,11 @@ def commandline_working_mode(args, db_connection):
         return
     if args.role == 'seller':
         logger.info('User is in seller mode.')
-        user_seller = seller.Seller(args.name)
+        user_seller = Seller(args.name)
         user_seller.interactions_silent(db_connection, args)
     elif args.role == 'manager':
         logger.info('User in manager mode.')
-        user_manager = manager.Manager(args.name)
+        user_manager = Manager(args.name)
         user_manager.interactions_silent(db_connection)
     else:
         logger.error('User has unexpected role: ' + args.role)
@@ -119,8 +106,7 @@ def interactive_working_mode(db_connection):
     :return:
     """
     logger.info('Application entered interactive mode.')
-    print('Welcome to CoffeeForMe seller/manager system!\n'
-          'To exit any time type "exit".')
+    print('Welcome to CoffeeForMe seller/manager system!\nTo exit any time type "exit".')
     while True:
         user_name = input_s('Input your user name: ')
         logger.info('User name is: ' + user_name)
@@ -132,12 +118,12 @@ def interactive_working_mode(db_connection):
         logger.info('Role is: ' + role)
         if role == 'seller':
             logger.info('User is in seller mode.')
-            user_seller = seller.Seller(user_name)
+            user_seller = Seller(user_name)
             user_seller.interactions(db_connection)
             break
         elif role == 'manager':
             logger.info('User in manager mode.')
-            user_manager = manager.Manager(user_name)
+            user_manager = Manager(user_name)
             user_manager.interactions(db_connection)
             break
         else:
@@ -158,11 +144,10 @@ def main():
     args = parse_arguments(init_argument_parser())
 
     # Setup DB connection.
-    db_connection = db_utils.DBUtils()
+    db_connection = DBUtils()
     logger.info('Preparing DB staff.')
     if not db_connection.prepare_db_connection():
-        print('Problems with DB, please check log.'
-              '\nApplication will exit now.')
+        print('Problems with DB, please check log.\nApplication will exit now.')
         logger.error('Exiting application because of DB problems.')
         return
 

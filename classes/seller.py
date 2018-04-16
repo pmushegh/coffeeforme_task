@@ -1,5 +1,5 @@
-from classes import employee
-from main import input_s
+from classes.employee import Employee
+from utils.input_s import input_s
 
 import json
 import logging
@@ -7,12 +7,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Seller(employee.Employee):
+class Seller(Employee):
     """
     Seller class extends Employee.
     """
     def __init__(self, name):
-        super().__init__(name, 'seller')
+        Employee.__init__(self, name, 'seller')
         self.coffee_types = dict()
         self.coffee_add_on_types = dict()
 
@@ -26,7 +26,7 @@ class Seller(employee.Employee):
         self.coffee_add_on_types = json.load(open("configurations/coffee_add_on_types.json"))
         return
 
-    def get_add_ons_price(self, coffee_add_ons) -> float:
+    def get_add_ons_price(self, coffee_add_ons):
         """
         Gets coffee add-ons total price, calls check_inputted_add_ons_and_get_total_price().
         :param coffee_add_ons: coffee_add_ons string
@@ -45,7 +45,7 @@ class Seller(employee.Employee):
         else:
             return 0.0
 
-    def perform_action(self, action, db_connection, total_price) -> bool:
+    def perform_action(self, action, db_connection, total_price):
         """
         Perform provide action(show sale price, save sale, exit).
         :param action: action name(price, save, end)
@@ -158,7 +158,7 @@ class Seller(employee.Employee):
                 return
         return
 
-    def check_inputted_add_ons_and_get_total_price(self, add_ons) -> float:
+    def check_inputted_add_ons_and_get_total_price(self, add_ons):
         """
         Calculated add-ons total price.
         :param add_ons: add-ons list

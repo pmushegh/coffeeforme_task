@@ -18,7 +18,7 @@ class DBUtils:
         self.logger.info(self.db_configuration)
         self.db_connection = mysql.connector.MySQLConnection()
 
-    def open_db_connection(self) -> bool:
+    def open_db_connection(self):
         """
         Setups connection to MySQL DB.
         :return: In case of success returns True, in case of any problem False.
@@ -37,7 +37,7 @@ class DBUtils:
                 self.logger.error('Some unexpected error during connection to MySQL:"\n' + traceback.format_exc())
             return False
 
-    def check_db(self) -> bool:
+    def check_db(self):
         """
         Check connection to DB, in case of if DB not available calls create_db_schema().
         :return: In case of success returns True, in case of any problem False.
@@ -68,7 +68,7 @@ class DBUtils:
                 self.logger.error('Some unexpected error during DB creation:"\n' + traceback.format_exc())
                 return False
 
-    def check_sales_table(self) -> bool:
+    def check_sales_table(self):
         """
         Check if "Sales" table is available, if not calls create_sales_table().
         :return: In case of success returns True, in case of any problem False.
@@ -93,7 +93,7 @@ class DBUtils:
             self.logger.error('Some unexpected error during Sales table check:"\n' + traceback.format_exc())
             return False
 
-    def create_sales_table(self) -> bool:
+    def create_sales_table(self):
         """
         Creates sales table.
         :return: In case of success returns True, in case of any problem False.
@@ -121,7 +121,7 @@ class DBUtils:
         self.logger.info('DB connection closed.')
         return
 
-    def create_db_schema(self, db_name) -> bool:
+    def create_db_schema(self, db_name):
         """
         Creates DB.
         :return: In case of success returns True, in case of any problem False.
@@ -136,7 +136,7 @@ class DBUtils:
             db_cursor.close()
             return False
 
-    def get_data_from_sales_table(self) -> list:
+    def get_data_from_sales_table(self):
         """
         Get all data from "Sales" table.
         :return: retrieved data
@@ -151,7 +151,7 @@ class DBUtils:
             self.logger.error('Problems during getting Sales table data:"\n' + traceback.format_exc())
             return None
 
-    def add_empty_seller_to_db(self, seller_name) -> bool:
+    def add_empty_seller_to_db(self, seller_name):
         """
         Adds empty seller record.
         :param seller_name:
@@ -170,7 +170,7 @@ class DBUtils:
             self.logger.error('Error during empty seller adding to DB:"\n' + traceback.format_exc())
             return False
 
-    def check_seller_existence(self, seller_name) -> bool:
+    def check_seller_existence(self, seller_name):
         """
         Check if seller record exists in "Sales" table, if not calls add_empty_seller_to_db().
         :param seller_name:
@@ -194,7 +194,7 @@ class DBUtils:
             db_cursor.close()
             return False
 
-    def update_seller_sale_statistics(self, seller_name, value, count=1) -> bool:
+    def update_seller_sale_statistics(self, seller_name, value, count=1):
         """
         Updates seller sale statistics in "Sales" table.
         :param seller_name:
@@ -215,7 +215,7 @@ class DBUtils:
             self.logger.error('Unexpected error during Sales table update:\n' + traceback.format_exc())
             return False
 
-    def prepare_db_connection(self) -> bool:
+    def prepare_db_connection(self):
         """
         Opens DB connection and calls check_db(), check_sales_table().
         :return: In case of success returns True, in case of any problem False.
@@ -225,8 +225,7 @@ class DBUtils:
             return False
         if not self.check_db():
             self.logger.error('Problems during DB check, please check log.')
-            print('Problems during DB check, please check log.'
-                  '\nApplication will exit now.')
+            print('Problems during DB check, please check log.\nApplication will exit now.')
             return False
         if not self.check_sales_table():
             self.logger.error('Problems with Sales table, please check log.')

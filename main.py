@@ -6,8 +6,8 @@ import traceback
 
 from utils.db_utils import DBUtils
 from utils.input_s import input_s
-from classes.manager import Manager
-from classes.seller import Seller
+from workers.manager import Manager
+from workers.seller import Seller
 
 logger = logging.getLogger(__name__)
 

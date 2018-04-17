@@ -1,4 +1,4 @@
-from classes.employee import Employee
+from workers.employee import Employee
 
 import logging
 

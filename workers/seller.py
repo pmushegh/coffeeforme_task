@@ -1,4 +1,4 @@
-from classes.employee import Employee
+from workers.employee import Employee
 from utils.input_s import input_s
 
 import json

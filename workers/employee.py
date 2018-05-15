@@ -1,4 +1,7 @@
-class Employee:
+from abc import ABCMeta, abstractmethod
+
+
+class Employee(metaclass=ABCMeta):
     """
     Employee class.
     """
@@ -6,6 +9,7 @@ class Employee:
         self.name = name
         self.role = role
 
+    @abstractmethod
     def interactions(self, db_connection):
         """
         Employee interaction base on commandline arguments.
@@ -16,6 +20,7 @@ class Employee:
         """
         pass
 
+    @abstractmethod
     def interactions_silent(self, db_connection, args):
         """
         Employee interaction base on commandline arguments.

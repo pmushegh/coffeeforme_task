@@ -1,10 +1,12 @@
-from workers.employee import Employee
-from utils.input_s import input_s
-
+"""Seller class inherited form Employee"""
 import json
 import logging
 
-logger = logging.getLogger(__name__)
+from workers.employee import Employee
+from utils.input_s import input_s
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Seller(Employee):
@@ -21,23 +23,23 @@ class Seller(Employee):
         Initializes coffee_types and coffee_add_on_types based on json configs.
         :return:
         """
-        logger.info('Reading coffee and add-on types configuration.')
+        LOGGER.info('Reading coffee and add-on types configuration.')
         self.coffee_types = json.load(open("configurations/coffee_types.json"))
         self.coffee_add_on_types = json.load(open("configurations/coffee_add_on_types.json"))
         return
 
     def get_add_ons_price(self, coffee_add_ons):
         """
-        Gets coffee add-ons total price, calls check_inputted_add_ons_and_get_total_price().
+        Gets coffee add-ons total price, calls get_add_ons_total_price().
         :param coffee_add_ons: coffee_add_ons string
         :return: Coffee add-ons total price, in case of problem None.
         """
         total_price = 0
         if coffee_add_ons != '':
             coffee_add_ons = coffee_add_ons.split(',')
-            add_ons_price = self.check_inputted_add_ons_and_get_total_price(coffee_add_ons)
+            add_ons_price = self.get_add_ons_total_price(coffee_add_ons)
             if add_ons_price is None:
-                logger.error('Problems with add-ons.')
+                LOGGER.error('Problems with add-ons.')
                 return None
             else:
                 total_price += add_ons_price
@@ -54,20 +56,20 @@ class Seller(Employee):
         :return: In case of success returns True, in case of any problem False.
         """
         if action == 'price':
-            logger.info('Showing price.')
+            LOGGER.info('Showing price.')
             print('Price is ' + str(total_price))
         elif action == 'save':
-            logger.info('Saving sale to DB.')
+            LOGGER.info('Saving sale to DB.')
             if not db_connection.update_seller_sale_statistics(self.name, total_price):
                 return False
             print('Sale saved to DB.')
             return False
         elif action == 'end':
-            logger.info('Exiting seller interactions.')
+            LOGGER.info('Exiting seller interactions.')
             print('Exiting seller interactions.')
             return False
         else:
-            logger.info('Unknown action is provided: ' + action)
+            LOGGER.info('Unknown action is provided: %s', action)
             print('Wrong action!')
         return True
 
@@ -89,13 +91,13 @@ class Seller(Employee):
         coffee_type_price = self.coffee_types.get(args.coffee_type)
         if coffee_type_price is None:
             print('Wrong coffee type is selected.')
-            logger.error('Unknown coffee type was selected.')
+            LOGGER.error('Unknown coffee type was selected.')
             return
         else:
             total_price += self.coffee_types.get(args.coffee_type)
 
         # Coffee add-on selection
-        logger.info('Getting add-ons price')
+        LOGGER.info('Getting add-ons price')
         add_ons_price = self.get_add_ons_price(args.coffee_add_ons)
         if add_ons_price is None:
             print('Problem with add-ons.')
@@ -130,7 +132,7 @@ class Seller(Employee):
         coffee_type_price = self.coffee_types.get(coffee_type)
         if coffee_type_price is None:
             print('Wrong coffee type is selected.')
-            logger.error('Unknown coffee type was selected.')
+            LOGGER.error('Unknown coffee type was selected.')
             return
         else:
             total_price += self.coffee_types.get(coffee_type)
@@ -142,7 +144,7 @@ class Seller(Employee):
         coffee_add_on_types_message = coffee_add_on_types_message[:-2] + ').\n'
         coffee_add_on_types_message += 'Add-ons should be separated by ","(exp. "sugar,milk"):'
         coffee_add_ons = input_s(coffee_add_on_types_message)
-        logger.info('Getting add-ons price')
+        LOGGER.info('Getting add-ons price')
         add_ons_price = self.get_add_ons_price(coffee_add_ons)
         if add_ons_price is None:
             print('Problem with add-ons.')
@@ -158,7 +160,7 @@ class Seller(Employee):
                 return
         return
 
-    def check_inputted_add_ons_and_get_total_price(self, add_ons):
+    def get_add_ons_total_price(self, add_ons):
         """
         Calculated add-ons total price.
         :param add_ons: add-ons list
@@ -168,7 +170,7 @@ class Seller(Employee):
         for add_on_item in add_ons:
             price = self.coffee_add_on_types.get(add_on_item)
             if price is None:
-                logger.error('Unknown add-on: ' + add_on_item)
+                LOGGER.error('Unknown add-on: %s', add_on_item)
                 return None
             else:
                 total_price += price

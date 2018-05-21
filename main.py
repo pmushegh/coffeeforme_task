@@ -1,3 +1,4 @@
+"""Application main module"""
 import logging
 import os
 import json
@@ -9,7 +10,7 @@ from utils.input_s import input_s
 from workers.manager import Manager
 from workers.seller import Seller
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def init_argument_parser():
@@ -50,7 +51,7 @@ def parse_arguments(parser):
     try:
         args_temp = parser.parse_args()
     except SystemExit:
-        logger.error('Unable to parse command line arguments: ' + traceback.format_exc())
+        LOGGER.error('Unable to parse command line arguments: %s', traceback.format_exc())
         print('Problems with commandline arguments parsing, see log for details.')
         exit(1)
     return args_temp
@@ -79,23 +80,23 @@ def commandline_working_mode(args, db_connection):
     :param db_connection: DBUtils type object
     :return:
     """
-    logger.info('Application entered commandline working mode.')
+    LOGGER.info('Application entered commandline working mode.')
     if args.role is None:
         print('--role commandline argument is not provided.')
-        logger.error('--role commandline argument is not provided.')
+        LOGGER.error('--role commandline argument is not provided.')
         return
     if args.role == 'seller':
-        logger.info('User is in seller mode.')
+        LOGGER.info('User is in seller mode.')
         user_seller = Seller(args.name)
         user_seller.interactions_silent(db_connection, args)
     elif args.role == 'manager':
-        logger.info('User in manager mode.')
+        LOGGER.info('User in manager mode.')
         user_manager = Manager(args.name)
         user_manager.interactions_silent(db_connection)
     else:
-        logger.error('User has unexpected role: ' + args.role)
+        LOGGER.error('User has unexpected role: %s', args.role)
         print('Role is wrong!')
-    logger.info('Application exited commandline working mode.')
+    LOGGER.info('Application exited commandline working mode.')
     return
 
 
@@ -105,32 +106,32 @@ def interactive_working_mode(db_connection):
     :param db_connection: DBUtils type object
     :return:
     """
-    logger.info('Application entered interactive mode.')
+    LOGGER.info('Application entered interactive mode.')
     print('Welcome to CoffeeForMe seller/manager system!\nTo exit any time type "exit".')
     while True:
         user_name = input_s('Input your user name: ')
-        logger.info('User name is: ' + user_name)
+        LOGGER.info('User name is: %s', user_name)
         if len(user_name) > 40:
-            logger.warning('Long user name: ' + user_name)
+            LOGGER.warning('Long user name: %s', user_name)
             print('Please input user name one more time, too long one.')
             continue
         role = input_s('Input your role(seller/manager): ')
-        logger.info('Role is: ' + role)
+        LOGGER.info('Role is: %s', role)
         if role == 'seller':
-            logger.info('User is in seller mode.')
+            LOGGER.info('User is in seller mode.')
             user_seller = Seller(user_name)
             user_seller.interactions(db_connection)
             break
         elif role == 'manager':
-            logger.info('User in manager mode.')
+            LOGGER.info('User in manager mode.')
             user_manager = Manager(user_name)
             user_manager.interactions(db_connection)
             break
         else:
-            logger.error('User has unexpected role: ' + role)
+            LOGGER.error('User has unexpected role: %s', role)
             print('Role is wrong!')
             break
-    logger.info('Application exited interactive mode.')
+    LOGGER.info('Application exited interactive mode.')
     return
 
 
@@ -145,10 +146,10 @@ def main():
 
     # Setup DB connection.
     db_connection = DBUtils()
-    logger.info('Preparing DB staff.')
+    LOGGER.info('Preparing DB staff.')
     if not db_connection.prepare_db_connection():
         print('Problems with DB, please check log.\nApplication will exit now.')
-        logger.error('Exiting application because of DB problems.')
+        LOGGER.error('Exiting application because of DB problems.')
         return
 
     try:
@@ -158,7 +159,7 @@ def main():
             commandline_working_mode(args, db_connection)
         db_connection.close_db_connection()
     except UserWarning as err:
-        logger.warning(err)
+        LOGGER.warning(err)
         db_connection.close_db_connection()
 
     return

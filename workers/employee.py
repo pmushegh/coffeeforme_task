@@ -1,3 +1,4 @@
+"""Employee abstract class"""
 from abc import ABCMeta, abstractmethod
 
 
@@ -30,4 +31,3 @@ class Employee(metaclass=ABCMeta):
         :return:
         """
         pass
-

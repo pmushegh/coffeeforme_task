@@ -1,8 +1,9 @@
-from workers.employee import Employee
-
+"""Manager class inherited form Employee"""
 import logging
 
-logger = logging.getLogger(__name__)
+from workers.employee import Employee
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Manager(Employee):
@@ -28,13 +29,13 @@ class Manager(Employee):
         :return:
         """
         print('You are in manager mode.')
-        logger.info('Getting sale data.')
+        LOGGER.info('Getting sale data.')
         all_sale_data = db_connection.get_data_from_sales_table()
         if all_sale_data is None:
             print('Problems with getting sales data.\nApplication will exit now.')
-            logger.error('Unable to retrieve sale data.')
+            LOGGER.error('Unable to retrieve sale data.')
         else:
-            logger.info('Printing sales data.')
+            LOGGER.info('Printing sales data.')
             total_sales_value = 0.0
             print('|' + '-' * 82 + '|\n|Sales data:' + ' ' * 71 + '|\n|' + '-' * 82 + '|')
             print('|{0:40}|{1:20}|{2:20}|'.format('Seller name', 'Number of sales', 'Total Value ($)'))
@@ -45,5 +46,5 @@ class Manager(Employee):
                 print('|' + '-' * 82 + '|')
             print('|' + ' ' * 40 + '|' + ' ' * 20 + '|{0:20}|'.format('Total:' + str(total_sales_value)))
             print('|' + '-' * 82 + '|')
-            logger.info('Finished printing sale data.')
+            LOGGER.info('Finished printing sale data.')
         return

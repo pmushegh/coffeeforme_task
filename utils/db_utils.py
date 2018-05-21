@@ -1,12 +1,14 @@
-import mysql.connector
+"""Utility class wor working with DB"""
 import logging
 import json
 import traceback
+import mysql.connector
 
 from mysql.connector import errorcode
 
 
 class DBUtils:
+    """DBUtils class"""
     def __init__(self):
         """
         Reads json configuration for connection to MySQL DB.
@@ -32,9 +34,9 @@ class DBUtils:
             return True
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                self.logger.error('DB access error. Message:"\n' + traceback.format_exc())
+                self.logger.error('DB access error. Message:"\n%s', traceback.format_exc())
             else:
-                self.logger.error('Some unexpected error during connection to MySQL:"\n' + traceback.format_exc())
+                self.logger.error('Some unexpected error during connection to MySQL:"\n%s', traceback.format_exc())
             return False
 
     def check_db(self):
@@ -49,11 +51,11 @@ class DBUtils:
             return True
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_BAD_DB_ERROR:
-                self.logger.warning('DB ' + self.db_configuration['database'] + ' doesn\'t exist.')
+                self.logger.warning('DB %s doesn\'t exist.', self.db_configuration['database'])
                 self.db_connection = mysql.connector.connect(user=self.db_configuration['user'],
                                                              password=self.db_configuration['password'],
                                                              host=self.db_configuration['host'])
-                self.logger.info('Creating DB ' + self.db_configuration['database'])
+                self.logger.info('Creating DB %s', self.db_configuration['database'])
                 if self.create_db_schema(self.db_configuration['database']):
                     self.logger.info('DB created.')
                     self.logger.info('Setting DB name for connection.')
@@ -65,7 +67,7 @@ class DBUtils:
                     self.db_connection.close()
                     return False
             else:
-                self.logger.error('Some unexpected error during DB creation:"\n' + traceback.format_exc())
+                self.logger.error('Some unexpected error during DB creation:"\n%s', traceback.format_exc())
                 return False
 
     def check_sales_table(self):
@@ -90,7 +92,7 @@ class DBUtils:
                     self.db_connection.close()
                     return False
         except mysql.connector.Error:
-            self.logger.error('Some unexpected error during Sales table check:"\n' + traceback.format_exc())
+            self.logger.error('Some unexpected error during Sales table check:"\n%s', traceback.format_exc())
             return False
 
     def create_sales_table(self):
@@ -109,7 +111,7 @@ class DBUtils:
             self.logger.info('Sales table created.')
             return True
         except mysql.connector.Error:
-            self.logger.error('Some unexpected error during Sales table creation:"\n' + traceback.format_exc())
+            self.logger.error('Some unexpected error during Sales table creation:"\n%s', traceback.format_exc())
             return False
 
     def close_db_connection(self):
@@ -132,7 +134,7 @@ class DBUtils:
             db_cursor.close()
             return True
         except mysql.connector.Error:
-            self.logger.error('Error during DB schema creation:"\n' + traceback.format_exc())
+            self.logger.error('Error during DB schema creation:"\n%s', traceback.format_exc())
             db_cursor.close()
             return False
 
@@ -148,7 +150,7 @@ class DBUtils:
             db_cursor.close()
             return result
         except mysql.connector.Error:
-            self.logger.error('Problems during getting Sales table data:"\n' + traceback.format_exc())
+            self.logger.error('Problems during getting Sales table data:"\n%s', traceback.format_exc())
             return None
 
     def add_empty_seller_to_db(self, seller_name):
@@ -164,10 +166,10 @@ class DBUtils:
             db_cursor.execute(sql)
             db_cursor.close()
             self.db_connection.commit()
-            self.logger.info('Seller ' + seller_name + ' empty data added to DB.')
+            self.logger.info('Seller %s empty data added to DB.', seller_name)
             return True
         except mysql.connector.Error:
-            self.logger.error('Error during empty seller adding to DB:"\n' + traceback.format_exc())
+            self.logger.error('Error during empty seller adding to DB:"\n%s', traceback.format_exc())
             return False
 
     def check_seller_existence(self, seller_name):
@@ -183,14 +185,14 @@ class DBUtils:
             record_number = db_cursor.fetchone()[0]
             db_cursor.close()
             if record_number == 1:
-                self.logger.info('User with name - ' + seller_name + ' exists, no need in new record creation.')
+                self.logger.info('User with name - %s exists, no need in new record creation.', seller_name)
             else:
-                self.logger.info('Adding user - ' + seller_name + ' to DB.')
+                self.logger.info('Adding user - %s to DB.', seller_name)
                 if not self.add_empty_seller_to_db(seller_name):
                     return False
             return True
         except mysql.connector.Error:
-            self.logger.error('Some problems during user existence check:"\n' + traceback.format_exc())
+            self.logger.error('Some problems during user existence check:"\n%s', traceback.format_exc())
             db_cursor.close()
             return False
 
@@ -212,7 +214,7 @@ class DBUtils:
             self.db_connection.commit()
             return True
         except mysql.connector.Error:
-            self.logger.error('Unexpected error during Sales table update:\n' + traceback.format_exc())
+            self.logger.error('Unexpected error during Sales table update:\n%s', traceback.format_exc())
             return False
 
     def prepare_db_connection(self):
@@ -231,4 +233,3 @@ class DBUtils:
             self.logger.error('Problems with Sales table, please check log.')
             return False
         return True
-

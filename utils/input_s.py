@@ -1,9 +1,7 @@
+"""Wrapper function for input()"""
 import logging
 
-from builtins import input
-
-
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def input_s(message=''):
@@ -15,6 +13,6 @@ def input_s(message=''):
     temp = input(message)
     if temp == 'exit':
         print('Application will exit now.')
-        logger.info('Exiting application after "exit" command.')
+        LOGGER.info('Exiting application after "exit" command.')
         raise UserWarning('Application exit on user demand.')
     return temp
